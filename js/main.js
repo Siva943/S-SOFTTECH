@@ -1,45 +1,40 @@
-(function(){
-  const menu=document.querySelector('.menu');
-  const nav=document.querySelector('.nav-links');
-  const navbar=document.querySelector('.navbar');
-  if(menu && nav){
-    menu.addEventListener('click',function(e){
-      e.preventDefault();
-      e.stopPropagation();
-      nav.classList.toggle('open');
-      menu.setAttribute('aria-expanded', nav.classList.contains('open') ? 'true' : 'false');
-      menu.innerHTML=nav.classList.contains('open') ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
-    });
+const nav=document.querySelector('.nav-links');
+const menu=document.querySelector('.menu');
+const bar=document.querySelector('.navbar');
+
+function closeMenu(){
+  nav?.classList.remove('open');
+  menu?.setAttribute('aria-expanded','false');
+  if(menu) menu.innerHTML='<i class="fa-solid fa-bars"></i>';
+  document.querySelectorAll('.drop.open').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('.drop>button').forEach(b=>b.setAttribute('aria-expanded','false'));
+}
+menu?.addEventListener('click',()=>{
+  const open=nav?.classList.toggle('open');
+  menu.setAttribute('aria-expanded',open?'true':'false');
+  menu.innerHTML=open?'<i class="fa-solid fa-xmark"></i>':'<i class="fa-solid fa-bars"></i>';
+});
+
+document.querySelectorAll('.drop>button').forEach(button=>button.addEventListener('click',e=>{
+  if(window.innerWidth<=950){
+    e.preventDefault();
+    const parent=button.parentElement;
+    const isOpen=parent.classList.toggle('open');
+    document.querySelectorAll('.drop').forEach(d=>{if(d!==parent)d.classList.remove('open')});
+    document.querySelectorAll('.drop>button').forEach(b=>b.setAttribute('aria-expanded','false'));
+    button.setAttribute('aria-expanded',isOpen?'true':'false');
   }
-  document.querySelectorAll('.drop > button').forEach(function(btn){
-    btn.addEventListener('click',function(e){
-      if(window.innerWidth <= 720){
-        e.preventDefault(); e.stopPropagation();
-        const parent=btn.closest('.drop');
-        document.querySelectorAll('.drop.open').forEach(function(x){if(x!==parent)x.classList.remove('open')});
-        parent.classList.toggle('open');
-      }
-    });
-  });
-  document.querySelectorAll('.nav-links > a').forEach(function(link){
-    link.addEventListener('click',function(){
-      if(window.innerWidth <= 720 && nav) nav.classList.remove('open');
-    });
-  });
-  window.addEventListener('resize',function(){
-    if(window.innerWidth > 720){
-      nav?.classList.remove('open');
-      document.querySelectorAll('.drop.open').forEach(x=>x.classList.remove('open'));
-    }
-  });
-  window.addEventListener('scroll',()=>navbar?.classList.toggle('scrolled',window.scrollY>20));
-  const io=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('show');io.unobserve(entry.target)}}),{threshold:.12});
-  document.querySelectorAll('.reveal').forEach(x=>io.observe(x));
-  document.querySelectorAll('.counter').forEach(el=>{
-    const ob=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){
-      const target=Number(el.dataset.target||0);let n=0;const step=Math.max(1,Math.ceil(target/45));
-      const run=()=>{n=Math.min(target,n+step);el.textContent=n+(target>=100?'+':'');if(n<target)requestAnimationFrame(run)};run();ob.disconnect();
-    }}));ob.observe(el);
-  });
-  document.querySelectorAll('form').forEach(form=>form.addEventListener('submit',function(e){e.preventDefault();alert('Thank you! Please contact S SOFTTECH by phone, WhatsApp or email to continue.');form.reset()}));
-})();
+}));
+
+document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>{
+  if(window.innerWidth<=950 && !a.closest('.drop')) closeMenu();
+}));
+window.addEventListener('resize',()=>{if(window.innerWidth>950)closeMenu()});
+window.addEventListener('scroll',()=>bar?.classList.toggle('scrolled',scrollY>20));
+
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(x=>io.observe(x));
+
+document.querySelectorAll('.counter').forEach(el=>{const ob=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){let t=+el.dataset.target,n=0,s=Math.max(1,Math.ceil(t/45));const f=()=>{n=Math.min(t,n+s);el.textContent=n+(t>=100?'+':'');if(n<t)requestAnimationFrame(f)};f();ob.disconnect()}}));ob.observe(el)});
+
+document.querySelectorAll('form').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();alert('Thank you for your enquiry. Please contact S SOFTTECH by phone, WhatsApp or email.');f.reset()}));
